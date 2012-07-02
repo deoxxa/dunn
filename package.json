@@ -1,0 +1,21 @@
+{
+  "name": "dunn",
+  "version": "0.0.0",
+  "description": "IRC bot for #webtech on freenode",
+  "author": "Josh Manders",
+  "contributors": [
+    "Conrad Pankoff <deoxxa@fknsrs.biz> (http://www.fknsrs.biz/)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/joshmanders/dunn.git"
+  },
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "dependencies": {
+    "irc": "~0.3.4"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {}
+}
