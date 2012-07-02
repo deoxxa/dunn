@@ -1,5 +1,5 @@
 var irc = require('irc');
-var Parse = require('parse-api').Parse;
+var Parse = require('./Parse.js');
 
 var bot = {
   nick: 'Dunn',
@@ -7,12 +7,17 @@ var bot = {
   channels: ['#webtech'],
   admins: ['Killswitch', 'K1llswitch'],
   cmd: '.',
+  alias: '?',
   db: {
     parse: {
       api_key: 'wvd7OvFb5chNRif22wrZHZdhWKaXoZ9gSS8lp2NI',
       master_key: 'rqbhP0Xb1Zqed6baa8GW8oGvW37yvLLok3NVtrvv'
     }
   }
+}
+
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
 var client = new irc.Client(bot.server, bot.nick, {
@@ -25,15 +30,20 @@ client.addListener('message', function (user, channel, message) {
   
   var karma_to, who;
   
-  db.insert('log', { channel: channel, user: user, message: message }, function (err, response) {
-
-    console.log('[' + channel + '] ' + user + ': ' + message);
-
-  });
-
-  if (greet = message.match(/^(hi|hello|greetings|hai|sup|wassup|wussup|what'?s up|hola|howdy|good (evening?|morning?|afternoon)|yo{1,10}) Dunn.?/i))
+  if (user !== bot.nick)
   {
-    client.say(channel, 'Hello ' + user + '.');
+      db.insert('log', { channel: channel, user: user, message: message }, function (err, response) {
+      console.log('[' + channel + '] ' + user + ': ' + message);
+    });
+  }
+
+  if (greet = message.match(/^(hi|hello|greetings|hai|sup|wassup|wussup|what'?s up|hola|howdy|good (evening?|morning?|afternoon)|yo{1,10}) (.*).?/i))
+  {
+    console.log(greet);
+    if (greet[3] === bot.nick.toLowerCase() || greet[3] === bot.nick)
+    {
+      client.say(channel, greet[1].capitalize() + ' ' + user + '.');
+    }
   }
   
   if (mad = message.match(/^(he|u|yu)mad\.(.*)$/i))
@@ -66,9 +76,7 @@ client.addListener('message', function (user, channel, message) {
     else
     {
       db.insert('karma', { channel: channel, from: user, to: karma_to, action: 'give' }, function (err, response) {
-      
           client.say(channel, user + ': Thank you for giving karma to ' + karma_to + '.');
-
       });
     }
     
@@ -84,9 +92,7 @@ client.addListener('message', function (user, channel, message) {
     else
     {
       db.insert('karma', { channel: channel, from: user, to: karma_to, action: 'take' }, function (err, response) {
-
           client.say(channel, user + ': I\'m sorry to hear ' + karma_to + ' wasn\'t very helpful. We\'ve taken a point away from them.');
-
       });
     }
     
@@ -95,10 +101,28 @@ client.addListener('message', function (user, channel, message) {
   if (seen = message.match(/^\.seen (.*)$/i))
   {
     who = seen[1];
-    db.find('log', { user: who }, function (err, response) {
-      console.log(response[response.length]);
-    });
-    client.say(channel, user + ': I haven\'t seen '+ who +' yet.');
+    if (who === user)
+    {
+      client.say(channel, user + ': You were last seen just now. :)');
+    }
+    else if (who === bot.nick)
+    {
+      client.say(channel, user + ': I am right here.');
+    }
+    else
+    {
+      db.findLatest('log', { user: who }, function (err, response) {
+        console.log(response);
+        if (response.results.length === 0)
+        {
+          client.say(channel, user + ': I have not seen ' + who + '.');
+        }
+        else
+        {
+          client.say(channel, user + ': The last time I seen ' + who + ' was at ' + response.results[0].createdAt + ' saying: <' + who + '> ' + response.results[0].message);
+        }
+      });
+    }
   }
   
   if (message === bot.nick + ' sing to me')
