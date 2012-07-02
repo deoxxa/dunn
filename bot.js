@@ -138,6 +138,11 @@ client.addListener('message', function (user, channel, message) {
     client.action(channel, 'can feel the love.');
   }
   
+  if (message === bot.cmd + 'code')
+  {
+    client.say(channel, 'You can view, and fork my code to contribute on GitHub @ http://www.github.com/joshmanders/dunn');
+  }
+  
 });
 
 client.addListener('join', function (channel, user, message) {
