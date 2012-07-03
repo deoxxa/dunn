@@ -11,7 +11,8 @@
     "url": "git://github.com/joshmanders/dunn.git"
   },
   "engines": {
-    "node": ">=0.6.0"
+    "node": "~0.8.0",
+    "npm": "~1.1.1"
   },
   "dependencies": {
     "irc": "~0.3.4"
